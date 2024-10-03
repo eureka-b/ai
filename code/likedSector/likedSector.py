@@ -1,7 +1,8 @@
 from fastapi import APIRouter, HTTPException, status, Header
-from ai.code.database import database
-from typing import Optional
+from database import database
 from pydantic import BaseModel
+from gpt_communication import *
+
 
 router = APIRouter(
     tags=["profile"],
@@ -16,7 +17,7 @@ class liked_sector(BaseModel):
 @router.post("", summary="관심 회사 정보")
 async def likedSector(item: liked_sector):
     """
-    관심종목으로 설정한 회사를 담은 엔드포인트입니다.
+    관심종목으로 설정한 회사의 정보를 조회하는 엔드포인트입니다.
    
     - **company**: 글 ID
 
@@ -28,17 +29,7 @@ async def likedSector(item: liked_sector):
         params = (userId, item.postID, item.postType)
         # 쿼리 실행
         result = await database.execute_query(query, params)
-
-        if len(result) == 0:
-            query = "INSERT INTO bookmark (user_id, post_id, post_type) VALUES (%s, %s, %s)"
-            params = (userId, item.postID, item.postType)
-            await database.execute_query(query, params)
-            return {"message": "Bookmarked successfully"}
-        else:
-            query = "DELETE FROM `bookmark` WHERE user_id = %s AND post_id = %s AND post_type = %s"
-            params = (userId, item.postID, item.postType)
-            await database.execute_query(query, params)
-            return {"message": "Bookmarked contents removed successfully"}
+        return result
     except Exception as e:
         print(e)
         raise HTTPException(
