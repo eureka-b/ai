@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 import os
 
 
+
 def gpt_communication(systemmessage, usermessage):
     # OpenAI API 키 설정
 
